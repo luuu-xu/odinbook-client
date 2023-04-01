@@ -1,0 +1,12 @@
+.feedCard {
+  max-width: 650px;
+}
+
+.userProfilePic {
+  height: 40px;
+  width: 40px;
+}
+
+.newPostModalTextarea {
+  height: 150px !important;
+}

@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { getToken } from "next-auth/jwt";
 // import GithubProvider from "next-auth/providers/github"
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -21,8 +22,9 @@ export const authOptions = {
 
         // If no error and we have user data, return it
         if (res.ok && data.user) {
-          console.log(data.user);
-          return data.user;
+          console.log('data.token', data.token);
+          console.log('data.user', data.user);
+          return data;
         }
         // Return null if user data could not be retrived
         return null
@@ -30,9 +32,28 @@ export const authOptions = {
     })
     // ...add more providers here
   ],
+  session: { 
+    strategy: 'jwt' 
+  },
   callbacks: {
-    async session({ session, token, user }) {
-      // session.accessToken = token;
+    async jwt({ token, user }) {
+      // console.log('jwt user', user);
+      if (user) {
+        token.accessToken = user.token;
+        token.userId = user.user._id;
+        token.userName = user.user.name;
+        token.userEmail = user.user.username;
+        token.userImage = user.user.profile_pic_url;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.accessToken = token.accessToken;
+      session.user.userId = token.userId;
+      session.user.name = token.userName;
+      session.user.email = token.userEmail;
+      session.user.image = token.userImage;
+      // console.log('session', session);
       return session;
     }
   }

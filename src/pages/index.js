@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Layout from '@/components/layout';
 import NavBar from '@/components/navbar';
+import HomeFeed from '@/components/homefeed';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -19,14 +20,14 @@ export default function Home() {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Layout>
-          <div>main page feed</div>
+          <HomeFeed />
         </Layout>
       </>
     );
   }
   return (
     <>
-      <NavBar></NavBar>
+      <NavBar />
       <div className='container-fluid py-5 bg-light'>
         <div className='container-sm'>
           <div className='row align-items-center justify-content-center gx-5'>
@@ -89,7 +90,7 @@ function CardLogin({ switchToSignup }) {
                 username: usernameInput,
                 password: passwordInput,
               });
-              console.log(res);
+              // console.log(res);
               if (!res.ok) {
                 setLoginLoading(false);
                 setLoginFailed(true);
