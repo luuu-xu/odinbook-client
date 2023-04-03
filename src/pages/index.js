@@ -6,7 +6,19 @@ import Layout from '@/components/layout';
 import NavBar from '@/components/navbar';
 import HomeFeed from '@/components/homefeed';
 
-export default function Home() {
+export async function getStaticProps() {
+  const res = await fetch('http://localhost:8080/api/posts');
+  const data = await res.json();
+  // console.log(data);
+
+  return {
+    props: {
+      posts: data.posts,
+    }
+  }
+}
+
+export default function Home({ posts }) {
   const { data: session } = useSession();
   const [signupCard, setSignupCard] = useState(false);
 
@@ -20,7 +32,7 @@ export default function Home() {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Layout>
-          <HomeFeed />
+          <HomeFeed posts={posts} />
         </Layout>
       </>
     );

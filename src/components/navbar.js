@@ -1,10 +1,13 @@
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import styles from '../styles/navbar.module.css';
 
 export default function NavBar() {
+  const { data: session } = useSession();
+
   // Enable Bootstrap tooltips when NavBar is created
   useEffect(() => {
+    // console.log(session?.user.image);
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
   }, []);
@@ -36,8 +39,18 @@ export default function NavBar() {
         <div className="dropdown"
           data-bs-toggle="tooltip" data-bs-title="Account" data-bs-placement="bottom"
         >
-          <img className={`dropdown-toggle rounded-circle ${styles.userProfilePic}`} role="button" data-bs-toggle="dropdown" aria-expanded="false" src="https://scontent.fyto3-1.fna.fbcdn.net/v/t1.6435-1/40685331_1671740149601769_7083282385508237312_n.jpg?stp=cp0_dst-jpg_p80x80&_nc_cat=103&ccb=1-7&_nc_sid=7206a8&_nc_ohc=_iijVqPNV-kAX_u0S5D&_nc_ht=scontent.fyto3-1.fna&oh=00_AfAWS51l6ga3RErZUQWmQh1ob-bsJTUhI17JCjQvMe2xkw&oe=644D6DA9"/>
-          <ul className="dropdown-menu dropdown-menu-start dropdown-menu-sm-end">
+          {session?.user.image ? 
+          <img className={`dropdown-toggle rounded-circle ${styles.userProfilePic}`} src={session.user.image} 
+          role="button" data-bs-toggle="dropdown" aria-expanded="false" />
+          :
+          <div className={`dropdown-toggle rounded-circle ${styles.userProfilePic}`} 
+          role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span className={`${styles.userProfilePicIcon} material-symbols-outlined`}>
+              account_circle
+            </span>
+          </div>
+          }
+          <ul className="dropdown-menu dropdown-menu-end">
             <li><a className="dropdown-item" href="#">Profile</a></li>
             <li><a className="dropdown-item" href="#">Page</a></li>
             <li><hr className="dropdown-divider"/></li>
