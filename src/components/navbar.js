@@ -1,6 +1,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import styles from '../styles/navbar.module.css';
+import { useRouter } from "next/router";
 
 export default function NavBar() {
   const { data: session } = useSession();
@@ -16,12 +17,12 @@ export default function NavBar() {
     <nav className="navbar navbar-expand-sm bg-white shadow-sm">
       <div className="container-fluid">
         <a className="navbar-brand text-primary fs-4" href="#"><strong>odinbook</strong></a>
-        <ul className="navbar-nav me-auto mb-2 mb-lg-0 d-flex flex-row">
+        <ul className="navbar-nav me-auto mb-lg-0 d-flex flex-row">
           <li className="nav-item">
-            <a className="nav-link active" aria-current="page" href="#" 
+            <a className="nav-link active" aria-current="page" href="/" 
               data-bs-toggle="tooltip" data-bs-title="Home" data-bs-placement="bottom"
             >
-              <span className="material-symbols-outlined fs-2">
+              <span className={`material-symbols-outlined ${styles.navItemIcon}`}>
                 home
               </span>
             </a>
@@ -30,7 +31,7 @@ export default function NavBar() {
             <a className="nav-link" href="/friends"
               data-bs-toggle="tooltip" data-bs-title="Firends" data-bs-placement="bottom"
             >
-              <span className="material-symbols-outlined fs-2">
+              <span className={`material-symbols-outlined ${styles.navItemIcon}`}>
                 group
               </span>
             </a>
@@ -55,7 +56,12 @@ export default function NavBar() {
             <li><a className="dropdown-item" href="#">Page</a></li>
             <li><hr className="dropdown-divider"/></li>
             <li>
-              <button className="dropdown-item text-danger" onClick={() => {signOut()}}>Log out</button>
+              <button className="dropdown-item text-danger" 
+              onClick={() => {
+                signOut({ callbackUrl: '/' });
+              }}>
+                Log out
+              </button>
             </li>
           </ul>
         </div>

@@ -217,7 +217,7 @@ function FeedPostCardLikeSection({ post }) {
       case 201:
         setLikeStatus('liked');
         console.log(data);
-        router.reload();
+        // router.reload();
         break;
       // Failed to like
       default:

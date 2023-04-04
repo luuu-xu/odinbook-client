@@ -3,7 +3,7 @@ import styles from '../styles/Home.module.css';
 import { signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Layout from '@/components/layout';
-import NavBar from '@/components/navbar';
+// import NavBar from '@/components/navbar';
 import HomeFeed from '@/components/homefeed';
 
 export async function getStaticProps() {
@@ -39,7 +39,7 @@ export default function Home({ posts }) {
   }
   return (
     <>
-      <NavBar />
+      {/* <NavBar /> */}
       <div className='container-fluid py-5 bg-light'>
         <div className='container-sm'>
           <div className='row align-items-center justify-content-center gx-5'>
