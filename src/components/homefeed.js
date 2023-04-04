@@ -4,11 +4,65 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DateTime } from 'luxon';
 
-export default function HomeFeed(props) {
+// export default function HomeFeed(props) {
+//   return (
+//     <div className="container mt-4">
+//       <NewPostCard />
+//       <FeedList {...props} />
+//     </div>
+//   );
+// }
+
+export default function HomeFeed() {
+  const { data: session } = useSession();
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    async function fetchAuthuserPosts() {
+      const res = await fetch('http://localhost:8080/api/authuser/posts', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      return data.posts;
+      // setPosts(posts);
+    }
+    async function fetchFriendsPosts() {
+      const res = await fetch('http://localhost:8080/api/authuser/friends-posts', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      return data.posts;
+      // setPosts(data.posts);
+    }
+    async function sortPosts() {
+      const authuserPosts = await fetchAuthuserPosts();
+      const friendsPosts = await fetchFriendsPosts();
+      const posts = [].concat(authuserPosts, friendsPosts);
+      posts.sort((a, b) => {
+        if (a.timestamp < b.timestamp) {
+          return 1;
+        }
+        if (a.timestamp > b.timestamp) {
+          return -1;
+        }
+      });
+      setPosts(posts);
+    }
+    sortPosts();
+  }, [session]);
+
   return (
     <div className="container mt-4">
       <NewPostCard />
-      <FeedList {...props} />
+      <FeedList posts={posts} />
     </div>
   );
 }
@@ -147,6 +201,8 @@ function FeedList({ posts }) {
 }
 
 function FeedPostCard({ post }) {
+  const [comments, setComments] = useState(post.comments);
+
   return (
     <div className='row mt-3 justify-content-center' key={post._id}>
       <div className={`card shadow-sm p-3 ${styles.feedCard}`}>
@@ -170,18 +226,18 @@ function FeedPostCard({ post }) {
             {post.content}
           </p>
         </div>
-        <FeedPostCardLikeSection post={post} />
-        <FeedPostCardCommentSection post={post} />
+        <FeedPostCardLikeSection post={post} comments={comments} />
+        <FeedPostCardCommentSection post={post} comments={comments} setComments={setComments} />
       </div>
     </div>
   );
 }
 
-function FeedPostCardLikeSection({ post }) {
+function FeedPostCardLikeSection({ post, comments }) {
   const { data: session } = useSession();
-  const router = useRouter();
   // likeStatus: 'unliked' || 'liked' || 'loading' || 'error'
   const [likeStatus, setLikeStatus] = useState('unliked');
+  const [likes, setLikes] = useState(post.likes);
 
   useEffect(() => {
     if (post.likes.length > 0) {
@@ -194,7 +250,7 @@ function FeedPostCardLikeSection({ post }) {
   }, []);
 
   const handleClickComment = () => {
-    const commentInputElement = document.getElementById('newCommentInput');
+    const commentInputElement = document.getElementById(`newCommentInput${post._id}`);
     commentInputElement.focus();
   }
 
@@ -217,7 +273,7 @@ function FeedPostCardLikeSection({ post }) {
       case 201:
         setLikeStatus('liked');
         console.log(data);
-        // router.reload();
+        setLikes([...likes, data.post.user]);
         break;
       // Failed to like
       default:
@@ -229,10 +285,10 @@ function FeedPostCardLikeSection({ post }) {
     <>
       <div className='d-flex d-row justify-content-between'>
         <div className='text-secondary'>
-          {post.likes.length > 0 && <span>{post.likes.length} {post.likes.length > 1 ? 'likes' : 'like'}</span>}
+          {likes.length > 0 && <span>{likes.length} {likes.length > 1 ? 'likes' : 'like'}</span>}
         </div>
         <div className='text-secondary'>
-          {post.comments.length > 0 && <span>{post.comments.length} {post.comments.length > 1 ? 'comments' : 'comment'}</span>}
+          {comments.length > 0 && <span>{comments.length} {comments.length > 1 ? 'comments' : 'comment'}</span>}
         </div>
       </div>
       <hr className='my-1 border-bottom'/>
@@ -291,18 +347,17 @@ function FeedPostCardLikeSection({ post }) {
   );
 }
 
-function FeedPostCardCommentSection({ post }) {
+function FeedPostCardCommentSection({ post, comments, setComments }) {
   return (
     <div>
-      <FeedPostCardCommentSecitonNewComment postid={post._id} />
-      <FeedPostCardCommentSectionCommentList comments={post.comments} />
+      <FeedPostCardCommentSecitonNewComment postid={post._id} comments={comments} setComments={setComments} />
+      <FeedPostCardCommentSectionCommentList comments={comments} />
     </div>
   );
 }
 
-function FeedPostCardCommentSecitonNewComment({ postid }) {
+function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments }) {
   const {data: session } = useSession();
-  const router = useRouter();
   const [commentInput, setCommentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isContentError, setIsContentError] = useState(false);
@@ -310,7 +365,6 @@ function FeedPostCardCommentSecitonNewComment({ postid }) {
   
   const handleNewComment = async (e) => {
     e.preventDefault();
-    console.log(commentInput);
     setIsLoading(true);
     setIsError(false);
     const res = await fetch(`http://localhost:8080/api/authuser/posts/${postid}/comments`, {
@@ -334,8 +388,15 @@ function FeedPostCardCommentSecitonNewComment({ postid }) {
         setIsLoading(false);
         setIsContentError(false);
         setIsError(false);
-        console.log(data);
-        router.reload();
+        setCommentInput('');
+        setComments([...comments, {
+          ...data.comment, 
+          user: {
+            ...data.comment.user, 
+            profile_pic_url: session.user.image,
+            name: session.user.name
+          }
+        }]);
         break;
       default:
         setIsLoading(false);
@@ -357,7 +418,7 @@ function FeedPostCardCommentSecitonNewComment({ postid }) {
       }
       <form className="col ms-2" onSubmit={handleNewComment}>
         <div className={`input-group w-100 ${styles.userProfilePic32}`}>
-          <input type='text' id='newCommentInput' className='form-control bg-light border-0 h-100 rounded-start-5' 
+          <input type='text' id={`newCommentInput${postid}`} className='form-control bg-light border-0 h-100 rounded-start-5' 
           placeholder='Write a comment...' aria-label='New comment' aria-describedby="button-addon"
           onChange={(e) => setCommentInput(e.target.value)} />
           <button className='btn btn-light border-0 h-100 rounded-end-5 d-flex align-items-center' type='submit' id='button-addon'>

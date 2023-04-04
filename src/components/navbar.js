@@ -8,7 +8,6 @@ export default function NavBar() {
 
   // Enable Bootstrap tooltips when NavBar is created
   useEffect(() => {
-    // console.log(session?.user.image);
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
   }, []);
@@ -52,8 +51,8 @@ export default function NavBar() {
           </div>
           }
           <ul className="dropdown-menu dropdown-menu-end">
-            <li><a className="dropdown-item" href="#">Profile</a></li>
-            <li><a className="dropdown-item" href="#">Page</a></li>
+            <li><a className="dropdown-item" href="/profile">Profile</a></li>
+            {/* <li><a className="dropdown-item" href="/friends">Friends</a></li> */}
             <li><hr className="dropdown-divider"/></li>
             <li>
               <button className="dropdown-item text-danger" 
