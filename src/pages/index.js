@@ -129,7 +129,7 @@ function CardLogin({ switchToSignup }) {
         {loginFailed && <div className='py-0 text-danger text-center'><small>Log in failed</small></div>}
       </form>
       <div className='border-bottom mt-2 mb-3'/>
-      <button onClick={() => {signIn('credentials')}} className='btn btn-outline-primary w-100'>Log in with Facebook</button>
+      <button onClick={() => {signIn()}} className='btn btn-outline-primary w-100'>Log in with Facebook</button>
       <button className='btn btn-outline-primary mt-3 w-100'>Log in as Visitor</button>
     </div>
   );
