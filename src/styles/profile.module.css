@@ -1,0 +1,16 @@
+.profileCard {
+  max-width: 650px;
+}
+
+.userProfilePicIcon {
+  font-size: 100px;
+}
+
+.userProfilePic {
+  width: 100px;
+  height: 100px;
+}
+
+.userProfilePicDiv {
+  max-width: 100px;
+}

@@ -13,7 +13,7 @@ import { DateTime } from 'luxon';
 //   );
 // }
 
-export default function HomeFeed() {
+export default function HomeFeed({ profileFeed }) {
   const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
 
@@ -42,7 +42,7 @@ export default function HomeFeed() {
       return data.posts;
       // setPosts(data.posts);
     }
-    async function sortPosts() {
+    async function sortAndSetPosts() {
       const authuserPosts = await fetchAuthuserPosts();
       const friendsPosts = await fetchFriendsPosts();
       const posts = [].concat(authuserPosts, friendsPosts);
@@ -56,12 +56,20 @@ export default function HomeFeed() {
       });
       setPosts(posts);
     }
-    sortPosts();
+    async function setAuthuserPosts() {
+      const authuserPosts = await fetchAuthuserPosts();
+      setPosts(authuserPosts);
+    }
+    if (profileFeed) {
+      setAuthuserPosts();
+    } else {
+      sortAndSetPosts();
+    }
   }, [session]);
 
   return (
     <div className="container mt-4">
-      <NewPostCard />
+      {profileFeed ? '' : <NewPostCard />}
       <FeedList posts={posts} />
     </div>
   );
