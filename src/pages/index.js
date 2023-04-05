@@ -137,7 +137,7 @@ function CardLogin({ switchToSignup }) {
       </form>
       <div className='border-bottom mt-2 mb-3'/>
       <button className='btn btn-outline-primary w-100'
-        onClick={() => {signIn()}} 
+        onClick={() => {signIn('facebook')}} 
       >
         Log in with Facebook
       </button>

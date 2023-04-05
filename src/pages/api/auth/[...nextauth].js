@@ -31,6 +31,7 @@ export const authOptions = {
       name: "facebook",
       clientId: process.env.FACEBOOK_CLIENT_ID,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      authorization: "https://www.facebook.com/v11.0/dialog/oauth?scope=email&auth_type=reauthenticate",
     }),
   ],
   session: { 
@@ -48,7 +49,7 @@ export const authOptions = {
           username: user.email,
           profile_pic_url: user.image
         };
-        const res = await fetch('http://localhost:8080/api/auth/oauth-login', {
+        const res = await fetch('http://localhost:8080/api/auth/facebook-login', {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },
