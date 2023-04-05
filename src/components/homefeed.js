@@ -3,17 +3,10 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DateTime } from 'luxon';
+import Link from 'next/link';
 
-// export default function HomeFeed(props) {
-//   return (
-//     <div className="container mt-4">
-//       <NewPostCard />
-//       <FeedList {...props} />
-//     </div>
-//   );
-// }
-
-export default function HomeFeed({ profileFeed }) {
+// feedType: 'all' || 'home' || 'profile'
+export default function HomeFeed({ feedType }) {
   const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
 
@@ -60,16 +53,26 @@ export default function HomeFeed({ profileFeed }) {
       const authuserPosts = await fetchAuthuserPosts();
       setPosts(authuserPosts);
     }
-    if (profileFeed) {
+    async function fetchAllPostsandSetPosts() {
+      const res = await fetch('http://localhost:8080/api/posts');
+      const data = await res.json();
+      setPosts(data.posts);
+    }
+    if (feedType === 'profile') {
       setAuthuserPosts();
-    } else {
+    } else if (feedType === 'home') {
       sortAndSetPosts();
+    } else if (feedType === 'all') {
+      fetchAllPostsandSetPosts();
     }
   }, [session]);
 
   return (
     <div className="container mt-4">
-      {profileFeed ? '' : <NewPostCard />}
+      <NewPostCard />
+      {feedType === 'home' && <h2 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your feed</h2>}
+      {feedType === 'profile' && <h2 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your posts</h2>}
+      {feedType === 'all' && <h2 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>All posts</h2>}
       <FeedList posts={posts} />
     </div>
   );
@@ -116,7 +119,7 @@ function NewPostCard() {
         setIsLoading(false);
         setIsContentError(false);
         setIsError(false);
-        console.log(data);
+        // console.log(data);
         router.reload();
         break;
       default:
@@ -199,6 +202,20 @@ function NewPostCard() {
 }
 
 function FeedList({ posts }) {
+  if (posts.length === 0) {
+    return (
+      <div className={`row mx-auto mt-3 ${styles.feedCard}`}>
+        <p className=''>No posts from you or your friends yet...</p>
+        <div className=''>
+          <p>Check out:</p>
+          <div className='d-flex gap-2'>
+            <Link href='/posts' className='btn btn-outline-secondary px-3 py-1'>All posts</Link>
+            <Link href='/friends' className='btn btn-outline-secondary px-3 py-1'>All users</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <ul className='ps-0'>
       {posts.map((post) => {

@@ -3,20 +3,7 @@ import styles from '../styles/Home.module.css';
 import { signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Layout from '@/components/layout';
-// import NavBar from '@/components/navbar';
 import HomeFeed from '@/components/homefeed';
-
-// export async function getStaticProps() {
-//   const res = await fetch('http://localhost:8080/api/posts');
-//   const data = await res.json();
-//   // console.log(data);
-
-//   return {
-//     props: {
-//       posts: data.posts,
-//     }
-//   }
-// }
 
 export default function Home() {
   const { data: session } = useSession();
@@ -32,14 +19,13 @@ export default function Home() {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <Layout>
-          <HomeFeed profileFeed={false} />
+          <HomeFeed feedType={'home'} />
         </Layout>
       </>
     );
   }
   return (
     <>
-      {/* <NavBar /> */}
       <div className='container-fluid py-5 bg-light'>
         <div className='container-sm'>
           <div className='row align-items-center justify-content-center gx-5'>
@@ -74,6 +60,47 @@ function CardLogin({ switchToSignup }) {
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginFailed(false);
+    const res = await signIn('credentials', { 
+      redirect: false,
+      username: usernameInput,
+      password: passwordInput,
+    });
+    if (!res.ok) {
+      setLoginLoading(false);
+      setLoginFailed(true);
+    }
+  }
+
+  const handleSwitchSignup = () => {
+    switchToSignup(true);
+  }
+
+  const handleVisitorLogin = async () => {
+    setLoginLoading(true);
+    setLoginFailed(false);
+    let res = await fetch('http://localhost:8080/api/auth/visitor-login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    const data = await res.json();
+    console.log(data);
+    res = await signIn('credentials', { 
+      redirect: false,
+      username: data.user.username,
+      password: data.user.username,
+    });
+    if (!res.ok) {
+      setLoginLoading(false);
+      setLoginFailed(true);
+    }
+  }
+
   return (
     <div className={`card shadow-sm p-4 ${styles.cardlogin}`}>
       <form>
@@ -92,22 +119,7 @@ function CardLogin({ switchToSignup }) {
           <label htmlFor='password' className='form-label'>Password</label>
         </div>
         <button type='submit' className='btn btn-primary w-100' disabled={loginLoading}
-          onClick={
-            async (e) => {
-              e.preventDefault();
-              setLoginLoading(true);
-              setLoginFailed(false);
-              const res = await signIn('credentials', { 
-                redirect: false,
-                username: usernameInput,
-                password: passwordInput,
-              });
-              // console.log(res);
-              if (!res.ok) {
-                setLoginLoading(false);
-                setLoginFailed(true);
-              }
-            }}
+          onClick={handleLogin}
         >
           {!loginLoading && 'Log in'}
           {loginLoading && 
@@ -117,20 +129,23 @@ function CardLogin({ switchToSignup }) {
           </div>}
         </button>
         <button className='btn btn-success mt-3 mb-2 w-100'
-          onClick={
-            async (e) => {
-              e.preventDefault();
-              switchToSignup(true);
-            }
-          }
+          onClick={handleSwitchSignup}
         >
           Sign up
         </button>
         {loginFailed && <div className='py-0 text-danger text-center'><small>Log in failed</small></div>}
       </form>
       <div className='border-bottom mt-2 mb-3'/>
-      <button onClick={() => {signIn()}} className='btn btn-outline-primary w-100'>Log in with Facebook</button>
-      <button className='btn btn-outline-primary mt-3 w-100'>Log in as Visitor</button>
+      <button className='btn btn-outline-primary w-100'
+        onClick={() => {signIn()}} 
+      >
+        Log in with Facebook
+      </button>
+      <button className='btn btn-outline-primary mt-3 w-100'
+        onClick={handleVisitorLogin}
+      >
+        Log in as Visitor
+      </button>
     </div>
   );
 }

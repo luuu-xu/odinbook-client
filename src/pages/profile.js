@@ -25,8 +25,7 @@ export default function ProfilePage() {
       <Layout>
         <div className="container mt-4">
           <ProfileSection userData={userData} setUserData={setUserData} />
-          <h2 className={`mx-auto mt-4 mb-0 ${styles.profileCard}`}>Posts</h2>
-          <HomeFeed profileFeed={true} />
+          <HomeFeed feedType={'profile'} />
         </div>
       </Layout>
     );

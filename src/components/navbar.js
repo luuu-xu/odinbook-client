@@ -12,11 +12,16 @@ export default function NavBar() {
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
   }, []);
 
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' });
+    // console.log(session.user);
+  }
+
   return (
     <nav className="navbar navbar-expand-sm bg-white shadow-sm">
       <div className="container-fluid">
         <a className="navbar-brand text-primary fs-4" href="#"><strong>odinbook</strong></a>
-        <ul className="navbar-nav me-auto mb-lg-0 d-flex flex-row">
+        <ul className="navbar-nav me-auto mb-lg-0 d-flex flex-row gap-2">
           <li className="nav-item">
             <a className="nav-link active" aria-current="page" href="/" 
               data-bs-toggle="tooltip" data-bs-title="Home" data-bs-placement="bottom"
@@ -32,6 +37,15 @@ export default function NavBar() {
             >
               <span className={`material-symbols-outlined ${styles.navItemIcon}`}>
                 group
+              </span>
+            </a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/posts"
+              data-bs-toggle="tooltip" data-bs-title="Posts" data-bs-placement="bottom"
+            >
+              <span className={`material-symbols-outlined ${styles.navItemIcon}`}>
+                article
               </span>
             </a>
           </li>
@@ -56,9 +70,7 @@ export default function NavBar() {
             <li><hr className="dropdown-divider"/></li>
             <li>
               <button className="dropdown-item text-danger" 
-              onClick={() => {
-                signOut({ callbackUrl: '/' });
-              }}>
+              onClick={handleLogout}>
                 Log out
               </button>
             </li>

@@ -21,8 +21,6 @@ export const authOptions = {
 
         // If no error and we have user data, return it
         if (res.ok && data.user) {
-          console.log('data.token', data.token);
-          console.log('data.user', data.user);
           return data;
         }
         // Return null if user data could not be retrived
@@ -43,8 +41,8 @@ export const authOptions = {
       // Facebook login where finding an existing account or creating a new account
       // in the database with the provided name, username and profile_pic_url
       if (account.provider === 'facebook') {
-        console.log('signIn ran once');
-        console.log('user signIn', user);
+        // console.log('signIn ran once');
+        // console.log('user signIn', user);
         const credentials = {
           name: user.name,
           username: user.email,
@@ -56,7 +54,7 @@ export const authOptions = {
           headers: { 'Content-Type': 'application/json' },
         });
         const data = await res.json();
-        console.log('data', data);
+        // console.log('data', data);
         user.id = data.user._id;
         user.token = data.token;
         return true;
@@ -65,9 +63,9 @@ export const authOptions = {
       }
     },
     async jwt({ token, user, account }) {
-      console.log('token jwt', token);
-      console.log('user jwt', user);
-      console.log('account jwt', account);
+      // console.log('token jwt', token);
+      // console.log('user jwt', user);
+      // console.log('account jwt', account);
       if (account?.provider === 'facebook') {
         token.accessToken = user.token;
         token.userId = user.id;
@@ -89,7 +87,7 @@ export const authOptions = {
       session.user.name = token.userName;
       session.user.email = token.userEmail;
       session.user.image = token.userImage;
-      console.log('session session', session);
+      // console.log('session session', session);
       return session;
     }
   },
