@@ -296,29 +296,55 @@ function FeedPostCardLikeSection({ post, comments }) {
   }
 
   const handleClickLike = async () => {
-    const res = await fetch(`http://localhost:8080/api/authuser/posts/${post._id}/give-like`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.accessToken}`,
-        'Content-Type': 'application/json'
-      },
-    });
     setLikeStatus('loading');
-    const data = await res.json();
-    switch (res.status) {
-      // Already liked
-      case 400:
-        setLikeStatus('liked');
-        break;
-      // Successfully liked
-      case 201:
-        setLikeStatus('liked');
-        console.log(data);
-        setLikes([...likes, data.post.user]);
-        break;
-      // Failed to like
-      default:
-        setLikeStatus('error');
+    if (likeStatus === 'unliked') {
+      const res = await fetch(`http://localhost:8080/api/authuser/posts/${post._id}/give-like`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      switch (res.status) {
+        // Already liked
+        case 400:
+          setLikeStatus('liked');
+          break;
+        // Successfully liked
+        case 201:
+          setLikeStatus('liked');
+          console.log(data);
+          setLikes(data.post.likes);
+          break;
+        // Failed to like
+        default:
+          setLikeStatus('error');
+      }
+    } else if (likeStatus === 'liked') {
+      const res = await fetch(`http://localhost:8080/api/authuser/posts/${post._id}/cancel-like`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.accessToken}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await res.json();
+      switch (res.status) {
+        // Already cancelled
+        case 400:
+          setLikeStatus('unliked');
+          break;
+        // Successfully unliked
+        case 201:
+          setLikeStatus('unliked');
+          console.log(data);
+          setLikes(data.post.likes);
+          break;
+        // Failed to like
+        default:
+          setLikeStatus('error');
+      }
     }
   }
 
