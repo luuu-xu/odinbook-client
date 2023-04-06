@@ -12,7 +12,7 @@ export const authOptions = {
         password: { label: "password", type: "password" },
       },
       async authorize(credentials, req) {
-        const res = await fetch('http://localhost:8080/api/auth/login', {
+        const res = await fetch(`${process.env.API_URL}/api/auth/login`, {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },
@@ -49,7 +49,7 @@ export const authOptions = {
           username: user.email,
           profile_pic_url: user.image
         };
-        const res = await fetch('http://localhost:8080/api/auth/facebook-login', {
+        const res = await fetch(`${process.env.API_URL}/api/auth/facebook-login`, {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },

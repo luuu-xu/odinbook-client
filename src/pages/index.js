@@ -82,7 +82,7 @@ function CardLogin({ switchToSignup }) {
   const handleVisitorLogin = async () => {
     setLoginLoading(true);
     setLoginFailed(false);
-    let res = await fetch('http://localhost:8080/api/auth/visitor-login', {
+    let res = await fetch(`${process.env.API_URL}/api/auth/visitor-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -187,7 +187,7 @@ function CardSignup({ switchToSignup }) {
             async (e) => {
               e.preventDefault();
               setSignupLoading(true);
-              const res = await fetch('http://localhost:8080/api/auth/signup', {
+              const res = await fetch(`${process.env.API_URL}/api/auth/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

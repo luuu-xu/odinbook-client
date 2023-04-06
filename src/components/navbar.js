@@ -13,7 +13,7 @@ export default function NavBar() {
   // Fetch authuser form session.user.userId and pass along the authuserData
   useEffect(() => {
     async function fetchAuthuser() {
-      const res = await fetch(`http://localhost:8080/api/users/${session.user.userId}`);
+      const res = await fetch(`${process.env.API_URL}/api/users/${session.user.userId}`);
       const data = await res.json();
       setAuthuserData(data.user);
     }
