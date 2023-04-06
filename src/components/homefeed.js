@@ -70,9 +70,9 @@ export default function HomeFeed({ feedType }) {
   return (
     <div className="container mt-4">
       <NewPostCard />
-      {feedType === 'home' && <h2 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your feed</h2>}
-      {feedType === 'profile' && <h2 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your posts</h2>}
-      {feedType === 'all' && <h2 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>All posts</h2>}
+      {feedType === 'home' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your feed</h3>}
+      {feedType === 'profile' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your posts</h3>}
+      {feedType === 'all' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>All posts</h3>}
       <FeedList posts={posts} />
     </div>
   );
@@ -82,33 +82,38 @@ function NewPostCard() {
   const { data: session } = useSession();
   const router = useRouter();
   const [contentInput, setContentInput] = useState('');
+  const [imageInput, setImageInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isContentError, setIsContentError] = useState(false);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const newPostModal = document.getElementById('newPostModal');
-    const floatingTextarea = document.getElementById('floatingTextarea');
+    const formTextarea = document.getElementById('formTextarea');
 
     newPostModal.addEventListener('shown.bs.modal', () => {
-      floatingTextarea.focus();
+      formTextarea.focus();
     });
   }, []);
 
   const handleNewPost = async (e) => {
+    e.preventDefault();
     setIsLoading(true);
     setIsError(false);
+    const formData = new FormData();
+    formData.append('content', contentInput);
+    if (imageInput) {
+      formData.append('image', imageInput);
+    }
+    // console.log(Object.fromEntries(formData));
     const res = await fetch('http://localhost:8080/api/authuser/posts', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.accessToken}`,
-        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        content: contentInput,
-      }),
+      body: formData,
     });
-    const data = await res.json();
+    // const data = await res.json();
     switch (res.status) {
       case 400:
         setIsLoading(false);
@@ -156,20 +161,26 @@ function NewPostCard() {
       {/* New Post Modal */}
       <div className="modal fade" id="newPostModal" tabIndex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
         <div className="modal-dialog">
-          <div className="modal-content">
+          <form className="modal-content" encType="multipart/form-data" onSubmit={handleNewPost}>
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="newPostModalLabel">Create Post</h1>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-              <form>
-                <div className='form-floating'>
-                  <textarea className={`form-control ${styles.newPostModalTextarea}`} placeholder="What's on your mind?" id="floatingTextarea" required
+              {/* <form encType="multipart/form-data" onSubmit={handleNewPost}> */}
+                <div className=''>
+                  <label htmlFor="formTextarea" className='form-label ms-2'>Content*</label>
+                  <textarea className={`form-control ${styles.newPostModalTextarea}`} placeholder="What's on your mind?" id="formTextarea" required
                     onChange={(e) => setContentInput(e.target.value)}
-                  ></textarea>
-                  <label htmlFor="floatingTextarea">Content</label>
+                  />
                 </div>
-              </form>
+                <div className="mt-2">
+                  <label htmlFor="formImage" className="form-label ms-2">{`Upload photo (JPG/JPEG not exceeding 16Mb)`}</label>
+                  <input className="form-control" type="file" id="formImage" name="formImage" 
+                    onChange={(e) => setImageInput(e.target.files[0])}
+                  />
+                </div>
+              {/* </form> */}
             </div>
             {isError && 
             <div className="alert alert-danger px-3 py-2 mx-3" role="alert">
@@ -183,8 +194,7 @@ function NewPostCard() {
             }
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary"
-                onClick={handleNewPost}
+              <button type="submit" className="btn btn-primary"
               >
                 {!isLoading && 'Post'}
                 {isLoading && 
@@ -194,7 +204,7 @@ function NewPostCard() {
                 </div>}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </>
@@ -230,8 +240,8 @@ function FeedPostCard({ post }) {
 
   return (
     <div className='row mt-3 justify-content-center' key={post._id}>
-      <div className={`card shadow-sm p-3 ${styles.feedCard}`}>
-        <div className='d-flex d-row gap-2'>
+      <div className={`card shadow-sm py-3 px-0 ${styles.feedCard}`}>
+        <div className='mx-3 d-flex d-row gap-2'>
           {post.user.profile_pic_url ? 
           <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={post.user.profile_pic_url} />
           :
@@ -246,10 +256,16 @@ function FeedPostCard({ post }) {
             <p className='p-0 mb-0'><small>{DateTime.fromISO(post.timestamp).toLocaleString(DateTime.DATETIME_SHORT)}</small></p>
           </div>
         </div>
-        <div className='card-text mt-1'>
+        <div className='mx-3 card-text mt-1'>
           <p className='my-2'>
             {post.content}
           </p>
+        </div>
+        <div className=''>
+          {post.image && 
+          <img className={`w-100 mb-2 ${styles.feedCardImage}`}
+            src={`data:${post.image.contentType};base64,${Buffer.from(post.image.data).toString('base64')}`} 
+          />}
         </div>
         <FeedPostCardLikeSection post={post} comments={comments} />
         <FeedPostCardCommentSection post={post} comments={comments} setComments={setComments} />
@@ -308,7 +324,7 @@ function FeedPostCardLikeSection({ post, comments }) {
 
   return (
     <>
-      <div className='d-flex d-row justify-content-between'>
+      <div className='mx-3 d-flex d-row justify-content-between'>
         <div className='text-secondary'>
           {likes.length > 0 && <span>{likes.length} {likes.length > 1 ? 'likes' : 'like'}</span>}
         </div>
@@ -316,8 +332,8 @@ function FeedPostCardLikeSection({ post, comments }) {
           {comments.length > 0 && <span>{comments.length} {comments.length > 1 ? 'comments' : 'comment'}</span>}
         </div>
       </div>
-      <hr className='my-1 border-bottom'/>
-      <div className='d-flex d-row gap-2'>
+      <hr className='mx-3 my-1 border-bottom'/>
+      <div className='mx-3 d-flex d-row gap-2'>
         <button className={`w-50 btn btn-outline-light text-secondary p-0 py-1 border-0 ${styles.iconTextButton}`} 
           onClick={handleClickLike}
         >
@@ -367,14 +383,14 @@ function FeedPostCardLikeSection({ post, comments }) {
           Comment
         </button>
       </div>
-      <hr className='my-1 border-bottom'/>
+      <hr className='mx-3 my-1 border-bottom'/>
     </>
   );
 }
 
 function FeedPostCardCommentSection({ post, comments, setComments }) {
   return (
-    <div>
+    <div className='mx-3'>
       <FeedPostCardCommentSecitonNewComment postid={post._id} comments={comments} setComments={setComments} />
       <FeedPostCardCommentSectionCommentList comments={comments} />
     </div>
