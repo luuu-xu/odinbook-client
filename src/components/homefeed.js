@@ -15,7 +15,7 @@ export default function HomeFeed({ feedType }) {
   // Fetch authuser form session.user.userId and pass along the authuserData
   useEffect(() => {
     async function fetchAuthuser() {
-      const res = await fetch(`${process.env.API_URL}/api/users/${session.user.userId}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${session.user.userId}`);
       const data = await res.json();
       setAuthuserData(data.user);
     }
@@ -27,7 +27,7 @@ export default function HomeFeed({ feedType }) {
   // Fetch posts according to the home feedType
   useEffect(() => {
     async function fetchAuthuserPosts() {
-      const res = await fetch(`${process.env.API_URL}/api/authuser/posts`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.accessToken}`,
@@ -39,7 +39,7 @@ export default function HomeFeed({ feedType }) {
       // setPosts(posts);
     }
     async function fetchFriendsPosts() {
-      const res = await fetch(`${process.env.API_URL}/api/authuser/friends-posts`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/friends-posts`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.accessToken}`,
@@ -71,7 +71,7 @@ export default function HomeFeed({ feedType }) {
       setPostsLoading(false);
     }
     async function fetchAllPostsandSetPosts() {
-      const res = await fetch(`${process.env.API_URL}/api/posts`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`);
       const data = await res.json();
       setPosts(data.posts);
       setPostsLoading(false);
@@ -125,7 +125,7 @@ function NewPostCard({ authuserData }) {
       formData.append('image', imageInput);
     }
     // console.log(Object.fromEntries(formData));
-    const res = await fetch(`${process.env.API_URL}/api/authuser/posts`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.accessToken}`,
@@ -328,7 +328,7 @@ function FeedPostCardLikeSection({ post, comments }) {
   const handleClickLike = async () => {
     setLikeStatus('loading');
     if (likeStatus === 'unliked') {
-      const res = await fetch(`${process.env.API_URL}/api/authuser/posts/${post._id}/give-like`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts/${post._id}/give-like`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.accessToken}`,
@@ -352,7 +352,7 @@ function FeedPostCardLikeSection({ post, comments }) {
           setLikeStatus('error');
       }
     } else if (likeStatus === 'liked') {
-      const res = await fetch(`${process.env.API_URL}/api/authuser/posts/${post._id}/cancel-like`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts/${post._id}/cancel-like`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.accessToken}`,
@@ -464,7 +464,7 @@ function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments, a
     e.preventDefault();
     setIsLoading(true);
     setIsError(false);
-    const res = await fetch(`${process.env.API_URL}/api/authuser/posts/${postid}/comments`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts/${postid}/comments`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.accessToken}`,

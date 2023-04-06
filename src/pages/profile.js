@@ -11,7 +11,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function fetchAuthuser() {
-      const res = await fetch(`${process.env.API_URL}/api/users/${session.user.userId}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${session.user.userId}`);
       const data = await res.json();
       setUserData(data.user);
     }
@@ -69,7 +69,7 @@ function ProfileEditModal({ userData, setUserData }) {
   const handleSaveChanges = async () => {
     setIsLoading(true);
     setIsSuccess(false);
-    const res = await fetch(`${process.env.API_URL}/api/authuser/edit-profile`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/edit-profile`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${session.accessToken}`,

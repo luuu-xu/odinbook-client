@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 export async function getStaticProps() {
-  const res = await fetch(`${process.env.API_URL}/api/users`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
   const data = await res.json();
   return {
     props: {
@@ -22,7 +22,7 @@ export default function FriendsPage({ users }) {
 
   useEffect(() => {
     async function getAuthuser() {
-      const res = await fetch(`${process.env.API_URL}/api/users/${session.user.userId}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${session.user.userId}`);
       const data = await res.json();
       setFriendRequestsSent(data.user.friend_requests_sent);
       setFriendRequestsReceived(data.user.friend_requests_received);
@@ -69,7 +69,7 @@ function FriendRequestCard({ user }) {
 
   const handleAcceptFriendRequest = async () => {
     setFriendRequestStatus('loading');
-    const res = await fetch(`${process.env.API_URL}/api/authuser/accept-friend-request/${user._id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/accept-friend-request/${user._id}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.accessToken}`,
@@ -209,7 +209,7 @@ function UserCard({ user, friendRequestsSentIds }) {
 
   const handleAddFriend = async () => {
     setFriendRequestStatus('loading');
-    const res = await fetch(`${process.env.API_URL}/api/authuser/send-friend-request/${user._id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/send-friend-request/${user._id}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${session.accessToken}`,
