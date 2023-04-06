@@ -8,6 +8,19 @@ export default function NavBar() {
   // activeNavLink: 'home' || 'friends' || 'posts'
   const [activeNavLink, setActiveNavLink] = useState('');
   const router = useRouter();
+  const [authuserData, setAuthuserData] = useState({});
+
+  // Fetch authuser form session.user.userId and pass along the authuserData
+  useEffect(() => {
+    async function fetchAuthuser() {
+      const res = await fetch(`http://localhost:8080/api/users/${session.user.userId}`);
+      const data = await res.json();
+      setAuthuserData(data.user);
+    }
+    if (session) {
+      fetchAuthuser();
+    }
+  }, [session]);
 
   // Set activeNavLink from pathname
   useEffect(() => {
@@ -60,8 +73,8 @@ export default function NavBar() {
         <div className="dropdown"
           data-bs-toggle="tooltip" data-bs-title="Account" data-bs-placement="bottom"
         >
-          {session?.user.image ? 
-          <img className={`dropdown-toggle rounded-circle ${styles.userProfilePic}`} src={session.user.image} 
+          {authuserData.profile_pic_url ? 
+          <img className={`dropdown-toggle rounded-circle ${styles.userProfilePic}`} src={authuserData.profile_pic_url} 
           role="button" data-bs-toggle="dropdown" aria-expanded="false" />
           :
           <div className={`dropdown-toggle rounded-circle ${styles.userProfilePic}`} 
@@ -73,7 +86,6 @@ export default function NavBar() {
           }
           <ul className="dropdown-menu dropdown-menu-end">
             <li><a className="dropdown-item" href="/profile">Profile</a></li>
-            {/* <li><a className="dropdown-item" href="/friends">Friends</a></li> */}
             <li><hr className="dropdown-divider"/></li>
             <li>
               <button className="dropdown-item text-danger" 

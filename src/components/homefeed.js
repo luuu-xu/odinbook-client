@@ -9,7 +9,22 @@ import Link from 'next/link';
 export default function HomeFeed({ feedType }) {
   const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+  const [authuserData, setAuthuserData] = useState({});
 
+  // Fetch authuser form session.user.userId and pass along the authuserData
+  useEffect(() => {
+    async function fetchAuthuser() {
+      const res = await fetch(`http://localhost:8080/api/users/${session.user.userId}`);
+      const data = await res.json();
+      setAuthuserData(data.user);
+    }
+    if (session) {
+      fetchAuthuser();
+    }
+  }, [session]);
+
+  // Fetch posts according to the home feedType
   useEffect(() => {
     async function fetchAuthuserPosts() {
       const res = await fetch('http://localhost:8080/api/authuser/posts', {
@@ -48,15 +63,18 @@ export default function HomeFeed({ feedType }) {
         }
       });
       setPosts(posts);
+      setPostsLoading(false);
     }
     async function setAuthuserPosts() {
       const authuserPosts = await fetchAuthuserPosts();
       setPosts(authuserPosts);
+      setPostsLoading(false);
     }
     async function fetchAllPostsandSetPosts() {
       const res = await fetch('http://localhost:8080/api/posts');
       const data = await res.json();
       setPosts(data.posts);
+      setPostsLoading(false);
     }
     if (feedType === 'profile') {
       setAuthuserPosts();
@@ -69,16 +87,16 @@ export default function HomeFeed({ feedType }) {
 
   return (
     <div className="container mt-4">
-      <NewPostCard />
+      <NewPostCard authuserData={authuserData}/>
       {feedType === 'home' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your feed</h3>}
       {feedType === 'profile' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your posts</h3>}
       {feedType === 'all' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>All posts</h3>}
-      <FeedList posts={posts} />
+      <FeedList posts={posts} postsLoading={postsLoading} authuserData={authuserData} />
     </div>
   );
 }
 
-function NewPostCard() {
+function NewPostCard({ authuserData }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [contentInput, setContentInput] = useState('');
@@ -86,6 +104,7 @@ function NewPostCard() {
   const [isLoading, setIsLoading] = useState(false);
   const [isContentError, setIsContentError] = useState(false);
   const [isError, setIsError] = useState(false);
+
 
   useEffect(() => {
     const newPostModal = document.getElementById('newPostModal');
@@ -139,8 +158,8 @@ function NewPostCard() {
       <div className='row justify-content-center'>
         <div className={`card shadow-sm p-3 ${styles.feedCard}`}>
           <div className="row g-0">
-            {session.user.image ? 
-            <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={session.user.image}/>
+            {authuserData.profile_pic_url ? 
+            <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={authuserData.profile_pic_url}/>
             :
             <div className={`my-auto rounded-circle ${styles.userProfilePic}`}>
               <span className={`${styles.userProfilePicIcon} material-symbols-outlined`}>
@@ -152,7 +171,7 @@ function NewPostCard() {
               <button className={`btn btn-light text-secondary rounded-5 w-100 text-start text-nowrap ${styles.userProfilePic}`}
                 data-bs-toggle="modal" data-bs-target="#newPostModal"
               >
-                What's on your mind, {session.user.name}?
+                What's on your mind, {authuserData.name}?
               </button>
             </div>
           </div>
@@ -211,8 +230,26 @@ function NewPostCard() {
   );
 }
 
-function FeedList({ posts }) {
-  if (posts.length === 0) {
+function FeedList({ posts, postsLoading, authuserData }) {
+  if (postsLoading) {
+    return (
+      <div className={`mx-auto ${styles.feedCard} text-center`}>
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (posts.length > 0) {
+    return (
+      <ul className='ps-0'>
+        {posts.map((post) => {
+          return <FeedPostCard key={post._id} post={post} authuserData={authuserData} />
+        })}
+      </ul>
+    );
+  } else {
     return (
       <div className={`row mx-auto mt-3 ${styles.feedCard}`}>
         <p className=''>No posts from you or your friends yet...</p>
@@ -226,16 +263,9 @@ function FeedList({ posts }) {
       </div>
     );
   }
-  return (
-    <ul className='ps-0'>
-      {posts.map((post) => {
-        return <FeedPostCard key={post._id} post={post} />
-      })}
-    </ul>
-  );
 }
 
-function FeedPostCard({ post }) {
+function FeedPostCard({ post, authuserData }) {
   const [comments, setComments] = useState(post.comments);
 
   return (
@@ -268,7 +298,7 @@ function FeedPostCard({ post }) {
           />}
         </div>
         <FeedPostCardLikeSection post={post} comments={comments} />
-        <FeedPostCardCommentSection post={post} comments={comments} setComments={setComments} />
+        <FeedPostCardCommentSection post={post} comments={comments} setComments={setComments} authuserData={authuserData} />
       </div>
     </div>
   );
@@ -358,7 +388,7 @@ function FeedPostCardLikeSection({ post, comments }) {
           {comments.length > 0 && <span>{comments.length} {comments.length > 1 ? 'comments' : 'comment'}</span>}
         </div>
       </div>
-      <hr className='mx-3 my-1 border-bottom'/>
+      {((likes.length > 0 || comments.length > 0) || !post.image ) && <hr className='mx-3 my-1 border-bottom'/>}
       <div className='mx-3 d-flex d-row gap-2'>
         <button className={`w-50 btn btn-outline-light text-secondary p-0 py-1 border-0 ${styles.iconTextButton}`} 
           onClick={handleClickLike}
@@ -414,16 +444,16 @@ function FeedPostCardLikeSection({ post, comments }) {
   );
 }
 
-function FeedPostCardCommentSection({ post, comments, setComments }) {
+function FeedPostCardCommentSection({ post, comments, setComments, authuserData }) {
   return (
     <div className='mx-3'>
-      <FeedPostCardCommentSecitonNewComment postid={post._id} comments={comments} setComments={setComments} />
+      <FeedPostCardCommentSecitonNewComment postid={post._id} comments={comments} setComments={setComments} authuserData={authuserData} />
       <FeedPostCardCommentSectionCommentList comments={comments} />
     </div>
   );
 }
 
-function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments }) {
+function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments, authuserData }) {
   const {data: session } = useSession();
   const [commentInput, setCommentInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -460,8 +490,8 @@ function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments })
           ...data.comment, 
           user: {
             ...data.comment.user, 
-            profile_pic_url: session.user.image,
-            name: session.user.name
+            profile_pic_url: authuserData.profile_pic_url,
+            name: authuserData.name,
           }
         }]);
         break;
@@ -474,8 +504,8 @@ function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments })
 
   return (
     <div className="row g-0 mt-1">
-      {session.user.image ? 
-      <img className={`my-auto rounded-circle ${styles.userProfilePic32}`} src={session.user.image}/>
+      {authuserData.profile_pic_url ? 
+      <img className={`my-auto rounded-circle ${styles.userProfilePic32}`} src={authuserData.profile_pic_url}/>
       :
       <div className={`my-auto rounded-circle ${styles.userProfilePic32}`}>
         <span className={`material-symbols-outlined ${styles.userProfilePicIcon32}`}>

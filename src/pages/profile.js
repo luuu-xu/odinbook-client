@@ -86,8 +86,9 @@ function ProfileEditModal({ userData, setUserData }) {
         setIsError(false);
         setIsSuccess(true);
         setTimeout(() => {
+          router.reload();
           setIsSuccess(false);
-        }, 3000);
+        }, 1500);
         break;
       default:
         setIsLoading(false);
@@ -138,7 +139,7 @@ function ProfileEditModal({ userData, setUserData }) {
               }
               {isSuccess && 
               <div className="alert alert-success px-3 py-2" role="alert">
-                Profile updated, please log in again to see changes
+                Profile updated, refreshing...
               </div>
               }
             </form>

@@ -1,3 +1,4 @@
+import Footer from "./footer";
 import NavBar from "./navbar";
 
 export default function Layout({ children }) {
@@ -5,7 +6,7 @@ export default function Layout({ children }) {
     <div className="bg-light mh-100">
       <NavBar />
       <main>{children}</main>
-      <div>Footer to be added...</div>
+      <Footer />
     </div>
   );
 }
