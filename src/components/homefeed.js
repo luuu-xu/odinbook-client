@@ -278,6 +278,25 @@ function FeedPostCard({ post, authuserData }) {
     }
   }, []);
 
+  // Display the post timestamp in a readable format
+  function postTimeStampDisplay() {
+    const postTimestamp = DateTime.fromISO(post.timestamp);
+    const nowTimestamp = Date.now();
+    const timeDiffInMinutes = Math.ceil((nowTimestamp - postTimestamp) / 1000 / 60);
+    if (timeDiffInMinutes < 60) {
+      return `${timeDiffInMinutes}m`;
+    }
+    const timeDiffInHours = Math.ceil(timeDiffInMinutes / 60);
+    if (timeDiffInHours < 24) {
+      return `${timeDiffInHours}h`;
+    }
+    const timeDiffInDays = Math.ceil(timeDiffInHours / 24);
+    if (timeDiffInDays < 5) {
+      return `${timeDiffInDays}d`;
+    }
+    return DateTime.fromISO(post.timestamp).toLocaleString(DateTime.DATETIME_SHORT);
+  }
+
   return (
     <div className='row mt-3 justify-content-center' key={post._id}>
       <div className={`card shadow-sm py-3 px-0 ${styles.feedCard}`}>
@@ -293,7 +312,8 @@ function FeedPostCard({ post, authuserData }) {
           }
           <div>
             <p className='p-0 mb-0'><strong>{post.user.name}</strong></p>
-            <p className='p-0 mb-0'><small>{DateTime.fromISO(post.timestamp).toLocaleString(DateTime.DATETIME_SHORT)}</small></p>
+            {/* <p className='p-0 mb-0'><small>{DateTime.fromISO(post.timestamp).toLocaleString(DateTime.DATETIME_SHORT)}</small></p> */}
+            <p className='p-0 mb-0'><small>{postTimeStampDisplay()}</small></p>
           </div>
         </div>
         <div className='mx-3 card-text mt-1'>
