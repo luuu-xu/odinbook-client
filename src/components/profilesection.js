@@ -23,7 +23,7 @@ export default function ProfileSection({ userData, setUserData, edit }) {
         <h1 className="mb-0"><strong>{userData.name}</strong></h1>
         <div>{`@${userData.username}`}</div>
         <div className="text-secondary">
-          {userData.friends?.length > 0 ? `${userData.friends.length} friends` : ''}
+          {userData.friends?.length > 1 ? `${userData.friends?.length} friends` : `${userData.friends?.length} friend`}
         </div>
       </div>
       {edit && <ProfileEditModal userData={userData} setUserData={setUserData} />}
