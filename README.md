@@ -1,3 +1,5 @@
+Live: https://odinbook-client-production-9219.up.railway.app
+
 # odinbook-client
 - This is a full-stack Facebook-clone website created with MERN stack and NextJS. 
 - The REST API used by this app is [odinbook-api](https://github.com/luuu-xu/odinbook-api).
