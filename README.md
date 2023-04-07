@@ -1,38 +1,52 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# odinbook-client
+- This is a full-stack Facebook-clone website created with MERN stack and NextJS. 
+- The REST API used by this app is [odinbook-api](https://github.com/luuu-xu/odinbook-api).
 
 ## Getting Started
+To get started with the website, follow these steps:
 
-First, run the development server:
+1. Clone the repository to your local machine.
+2. Run npm install to install the project dependencies.
+3. Rename .env.local.example file to .env.local and fill in the necessary environment variables.
+4. Run npm run dev to start the development server.
+5. Open http://localhost:3000 in your web browser to view the website.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Features
+The website includes the following features:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Authentication for users of credentials.
+- Visits the website as a visitor.
+- Logs in with Facebook authentication.
+- View posts from user and friends in a feed manner.
+- Make a post with or without an image.
+- View and make comments.
+- Like a post.
+- Change name and profile picture url on profile.
+- Responsive design supported by Bootstrap.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Dependencies
+The following dependencies are used in this project:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+- next: Framework for server-rendered React applications.
+- react: JavaScript library for building user interfaces.
+- react-dom: Entry point to the DOM and server renderer for React.
+- bootstrap: Responsive design supported.
+- luxon: DateTime helper.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Pages
+The website includes the following pages:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- /: The homepage, which displays authentication forms.
+- /: The homepage including a feed, after authentication.
+- /friends: Displays a list of users including user's friends and friend requests.
+- /posts: Displays a list of all posts from all users.
+- /profile: Displays the profile page of the user and also a feed from user's posts.
 
-## Learn More
+## API Endpoints
+The website uses the API endpoints from [odinbook-api](https://github.com/luuu-xu/odinbook-api).
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
+Contributions are welcome! If you'd like to contribute to this project, please fork the repository and submit a pull request.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
