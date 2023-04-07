@@ -11,7 +11,10 @@ export async function getStaticPaths() {
   }));
   return {
     paths,
-    fallback: false,
+
+    // { fallback: 'blocking' } will server-render pages
+    // on-demand if the path doesn't exist.
+    fallback: 'blocking',
   };
 }
 
