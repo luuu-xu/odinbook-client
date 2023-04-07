@@ -23,7 +23,7 @@ export default function ProfilePage() {
   if (session) {
     return (
       <Layout>
-        <div className="container mt-4">
+        <div className="mt-4">
           <ProfileSection userData={userData} setUserData={setUserData} />
           <HomeFeed feedType={'profile'} />
         </div>

@@ -8,7 +8,7 @@ export default function PostsPage() {
   if (session) {
     return (
       <Layout>
-        <div className="container mt-4">
+        <div className="mt-4">
           <HomeFeed feedType={'all'} />
         </div>
       </Layout>
