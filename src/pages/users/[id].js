@@ -25,6 +25,8 @@ export async function getStaticProps({ params }) {
       user: dataUser.user,
       posts: dataPosts.posts
     },
+    // Incremental Static Regeneration
+    revalidate: 10,
   }
 }
 
