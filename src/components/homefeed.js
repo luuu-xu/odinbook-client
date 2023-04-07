@@ -1,6 +1,6 @@
 import styles from '../styles/homefeed.module.css';
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
@@ -36,7 +36,6 @@ export default function HomeFeed({ feedType }) {
       });
       const data = await res.json();
       return data.posts;
-      // setPosts(posts);
     }
     async function fetchFriendsPosts() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/friends-posts`, {
@@ -48,7 +47,6 @@ export default function HomeFeed({ feedType }) {
       });
       const data = await res.json();
       return data.posts;
-      // setPosts(data.posts);
     }
     async function sortAndSetPosts() {
       const authuserPosts = await fetchAuthuserPosts();
@@ -105,7 +103,7 @@ function NewPostCard({ authuserData }) {
   const [isContentError, setIsContentError] = useState(false);
   const [isError, setIsError] = useState(false);
 
-
+  // Focus on the content input when newPostModal is shown
   useEffect(() => {
     const newPostModal = document.getElementById('newPostModal');
     const formTextarea = document.getElementById('formTextarea');
@@ -115,6 +113,7 @@ function NewPostCard({ authuserData }) {
     });
   }, []);
 
+  // Create FormData object with the content and the optional image for the new post
   const handleNewPost = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -124,7 +123,6 @@ function NewPostCard({ authuserData }) {
     if (imageInput) {
       formData.append('image', imageInput);
     }
-    // console.log(Object.fromEntries(formData));
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts`, {
       method: 'POST',
       headers: {
@@ -132,7 +130,6 @@ function NewPostCard({ authuserData }) {
       },
       body: formData,
     });
-    // const data = await res.json();
     switch (res.status) {
       case 400:
         setIsLoading(false);
@@ -143,7 +140,6 @@ function NewPostCard({ authuserData }) {
         setIsLoading(false);
         setIsContentError(false);
         setIsError(false);
-        // console.log(data);
         router.reload();
         break;
       default:
@@ -186,20 +182,18 @@ function NewPostCard({ authuserData }) {
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-              {/* <form encType="multipart/form-data" onSubmit={handleNewPost}> */}
-                <div className=''>
-                  <label htmlFor="formTextarea" className='form-label ms-2'>Content*</label>
-                  <textarea className={`form-control ${styles.newPostModalTextarea}`} placeholder="What's on your mind?" id="formTextarea" required
-                    onChange={(e) => setContentInput(e.target.value)}
-                  />
-                </div>
-                <div className="mt-2">
-                  <label htmlFor="formImage" className="form-label ms-2">{`Upload photo (JPG/JPEG not exceeding 16Mb)`}</label>
-                  <input className="form-control" type="file" id="formImage" name="formImage" 
-                    onChange={(e) => setImageInput(e.target.files[0])}
-                  />
-                </div>
-              {/* </form> */}
+              <div className=''>
+                <label htmlFor="formTextarea" className='form-label ms-2'>Content*</label>
+                <textarea className={`form-control ${styles.newPostModalTextarea}`} placeholder="What's on your mind?" id="formTextarea" required
+                  onChange={(e) => setContentInput(e.target.value)}
+                />
+              </div>
+              <div className="mt-2">
+                <label htmlFor="formImage" className="form-label ms-2">{`Upload photo (JPG/JPEG not exceeding 16Mb)`}</label>
+                <input className="form-control" type="file" id="formImage" name="formImage" 
+                  onChange={(e) => setImageInput(e.target.files[0])}
+                />
+              </div>
             </div>
             {isError && 
             <div className="alert alert-danger px-3 py-2 mx-3" role="alert">
@@ -267,6 +261,22 @@ function FeedList({ posts, postsLoading, authuserData }) {
 
 function FeedPostCard({ post, authuserData }) {
   const [comments, setComments] = useState(post.comments);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageData, setImageData] = useState();
+
+  // Fetch the image if the post has one
+  useEffect(() =>{
+    async function getImage() {
+      setImageLoading(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/images/${post.image}`);
+      const data = await res.json();
+      setImageData(data.image);
+      setImageLoading(false);
+    }
+    if (post.image) {
+      getImage();
+    }
+  }, []);
 
   return (
     <div className='row mt-3 justify-content-center' key={post._id}>
@@ -291,11 +301,17 @@ function FeedPostCard({ post, authuserData }) {
             {post.content}
           </p>
         </div>
-        <div className=''>
-          {post.image && 
-          <img className={`w-100 mb-2 ${styles.feedCardImage}`}
-            src={`data:${post.image.contentType};base64,${Buffer.from(post.image.data).toString('base64')}`} 
-          />}
+        <div className='mx-auto'>
+          {imageLoading &&
+            <div className="spinner-border text-secondary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          }
+          {imageData &&
+            <img className={`w-100 mb-2 ${styles.feedCardImage}`}
+              src={imageData ? `data:${imageData.contentType};base64,${Buffer.from(imageData.data).toString('base64')}` : ''} 
+            />
+          }
         </div>
         <FeedPostCardLikeSection post={post} comments={comments} />
         <FeedPostCardCommentSection post={post} comments={comments} setComments={setComments} authuserData={authuserData} />
