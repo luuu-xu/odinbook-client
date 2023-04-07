@@ -11,8 +11,16 @@
   width: 40px;
 }
 
+.userProfilePic:hover {
+  cursor: pointer;
+}
+
 .userProfilePicIcon {
   font-size: 40px!important;
+}
+
+.userProfilePicIcon:hover {
+  cursor: pointer;
 }
 
 .newPostModalTextarea {
@@ -34,10 +42,22 @@
   width: 32px;
 }
 
+.userProfilePic32:hover {
+  cursor: pointer;
+}
+
 .userProfilePicIcon32 {
   font-size: 32px!important;
 }
 
+.userProfilePicIcon32:hover {
+  cursor: pointer;
+}
+
 .commentBubble{
   max-width: calc(100% - 40px);
+}
+
+.profileClick:hover {
+  cursor: pointer;
 }

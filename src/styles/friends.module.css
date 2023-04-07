@@ -7,6 +7,14 @@
   width: 40px;
 }
 
+.userProfilePic:hover {
+  cursor: pointer;
+}
+
 .userProfilePicIcon {
   font-size: 40px!important;
+}
+
+.userProfilePicIcon:hover {
+  cursor: pointer;
 }

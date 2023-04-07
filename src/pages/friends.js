@@ -3,6 +3,7 @@ import styles from '../styles/friends.module.css';
 import { useSession, getSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export async function getStaticProps() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`);
@@ -76,7 +77,6 @@ function FriendRequestCard({ user }) {
         'Content-Type': 'application/json',
       },
     });
-    const data = await res.json();
     switch (res.status) {
       // Friend request accepted
       case 200:
@@ -88,21 +88,27 @@ function FriendRequestCard({ user }) {
     }
   }
 
+  const handleClickProfilePic = () => {
+    router.push(`/users/${user._id}`);
+  }
+
   return (
     <li className="row mt-3 justify-content-center">
       <div className={`card shadow-sm p-3`}>
         <div className='d-flex d-row align-items-center gap-2'>
           {user.profile_pic_url ? 
-          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={user.profile_pic_url} />
+          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} 
+            src={user.profile_pic_url} onClick={handleClickProfilePic}
+          />
           :
-          <div className={`my-auto rounded-circle ${styles.userProfilePic}`}>
+          <div className={`my-auto rounded-circle ${styles.userProfilePic}`} onClick={handleClickProfilePic}>
             <span className={`${styles.userProfilePicIcon} material-symbols-outlined`}>
               account_circle
             </span>
           </div>
           }
           <div>
-            <p className='p-0 mb-0'><strong>{user.name}</strong></p>
+            <Link href={`/users/${user._id}`} className='p-0 mb-0'><strong>{user.name}</strong></Link>
           </div>
           {(() => {switch (friendRequestStatus) {
             case 'received':
@@ -147,21 +153,29 @@ function FriendsSection({ friends }) {
 }
 
 function FriendCard({ user }) {
+  const router = useRouter();
+
+  const handleClickProfilePic = () => {
+    router.push(`/users/${user._id}`);
+  }
+
   return (
     <li className="row mt-3 justify-content-center">
       <div className={`card shadow-sm p-3`}>
         <div className='d-flex d-row align-items-center gap-2'>
           {user.profile_pic_url ? 
-          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={user.profile_pic_url} />
+          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} 
+            onClick={handleClickProfilePic} src={user.profile_pic_url} 
+          />
           :
-          <div className={`my-auto rounded-circle ${styles.userProfilePic}`}>
+          <div className={`my-auto rounded-circle ${styles.userProfilePic}`} onClick={handleClickProfilePic}>
             <span className={`${styles.userProfilePicIcon} material-symbols-outlined`}>
               account_circle
             </span>
           </div>
           }
           <div>
-            <p className='p-0 mb-0'><strong>{user.name}</strong></p>
+            <Link href={`/users/${user._id}`} className='p-0 mb-0'><strong>{user.name}</strong></Link>
           </div>
         </div>
       </div>
@@ -228,21 +242,27 @@ function UserCard({ user, friendRequestsSentIds }) {
     }
   }
 
+  const handleClickProfilePic = () => {
+    router.push(`/users/${user._id}`);
+  }
+
   return (
     <li className="row mt-3 justify-content-center">
       <div className={`card shadow-sm p-3`}>
         <div className='d-flex d-row align-items-center gap-2'>
           {user.profile_pic_url ? 
-          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={user.profile_pic_url} />
+          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} 
+            onClick={handleClickProfilePic} src={user.profile_pic_url} 
+          />
           :
-          <div className={`my-auto rounded-circle ${styles.userProfilePic}`}>
+          <div className={`my-auto rounded-circle ${styles.userProfilePic}`} onClick={handleClickProfilePic}>
             <span className={`${styles.userProfilePicIcon} material-symbols-outlined`}>
               account_circle
             </span>
           </div>
           }
           <div>
-            <p className='p-0 mb-0'><strong>{user.name}</strong></p>
+            <Link href={`/users/${user._id}`} className='p-0 mb-0'><strong>{user.name}</strong></Link>
           </div>
           {(() => {switch (friendRequestStatus) {
             case 'none':

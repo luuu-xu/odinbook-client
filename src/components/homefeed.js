@@ -1,12 +1,12 @@
 import styles from '../styles/homefeed.module.css';
 import { useSession } from 'next-auth/react';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DateTime } from 'luxon';
 import Link from 'next/link';
 
-// feedType: 'all' || 'home' || 'profile'
-export default function HomeFeed({ feedType }) {
+// feedType: 'all' || 'home' || 'profile' || 'user'
+export default function HomeFeed({ feedType, postsData }) {
   const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
@@ -68,7 +68,7 @@ export default function HomeFeed({ feedType }) {
       setPosts(authuserPosts);
       setPostsLoading(false);
     }
-    async function fetchAllPostsandSetPosts() {
+    async function fetchAllPostsAndSetPosts() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`);
       const data = await res.json();
       setPosts(data.posts);
@@ -79,17 +79,21 @@ export default function HomeFeed({ feedType }) {
     } else if (feedType === 'home') {
       sortAndSetPosts();
     } else if (feedType === 'all') {
-      fetchAllPostsandSetPosts();
+      fetchAllPostsAndSetPosts();
+    } else if (feedType === 'user') {
+      setPostsLoading(false);
+      setPosts(postsData);
     }
   }, [session]);
 
   return (
     <div className="container mt-4">
-      <NewPostCard authuserData={authuserData}/>
+      {feedType !== 'user' && <NewPostCard authuserData={authuserData} />}
       {feedType === 'home' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your feed</h3>}
       {feedType === 'profile' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your posts</h3>}
       {feedType === 'all' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>All posts</h3>}
-      <FeedList posts={posts} postsLoading={postsLoading} authuserData={authuserData} />
+      {feedType === 'user' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Posts</h3>}
+      <FeedList posts={posts} postsLoading={postsLoading} authuserData={authuserData} feedType={feedType} />
     </div>
   );
 }
@@ -224,7 +228,7 @@ function NewPostCard({ authuserData }) {
   );
 }
 
-function FeedList({ posts, postsLoading, authuserData }) {
+function FeedList({ posts, postsLoading, authuserData, feedType }) {
   if (postsLoading) {
     return (
       <div className={`mx-auto ${styles.feedCard} text-center`}>
@@ -246,7 +250,10 @@ function FeedList({ posts, postsLoading, authuserData }) {
   } else {
     return (
       <div className={`row mx-auto mt-3 ${styles.feedCard}`}>
-        <p className=''>No posts from you or your friends yet...</p>
+        {feedType === 'home' && <p className=''>No posts from you or your friends yet...</p>}
+        {feedType === 'user' && <p className=''>No posts from this user yet...</p>}
+        {feedType === 'profile' && <p className=''>No posts from you yet...</p>}
+        {feedType === 'all' && <p className=''>No posts yet...</p>}
         <div className=''>
           <p>Check out:</p>
           <div className='d-flex gap-2'>
@@ -263,6 +270,7 @@ function FeedPostCard({ post, authuserData }) {
   const [comments, setComments] = useState(post.comments);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageData, setImageData] = useState();
+  const router = useRouter();
 
   // Fetch the image if the post has one
   useEffect(() =>{
@@ -297,22 +305,30 @@ function FeedPostCard({ post, authuserData }) {
     return DateTime.fromISO(post.timestamp).toLocaleString(DateTime.DATETIME_SHORT);
   }
 
+  // Handle clicks on a user profile picture
+  function handleUserProfilePicClick() {
+    router.push(`/users/${post.user._id}`);
+  }
+
   return (
     <div className='row mt-3 justify-content-center' key={post._id}>
       <div className={`card shadow-sm py-3 px-0 ${styles.feedCard}`}>
-        <div className='mx-3 d-flex d-row gap-2'>
+        <div className={`mx-3 d-flex d-row gap-2`}>
           {post.user.profile_pic_url ? 
-          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} src={post.user.profile_pic_url} />
+          <img className={`my-auto rounded-circle ${styles.userProfilePic}`} 
+          src={post.user.profile_pic_url} onClick={handleUserProfilePicClick}
+          />
           :
-          <div className={`my-auto rounded-circle ${styles.userProfilePic}`}>
+          <div className={`my-auto rounded-circle ${styles.userProfilePic}`}
+          onClick={handleUserProfilePicClick}
+          >
             <span className={`${styles.userProfilePicIcon} material-symbols-outlined`}>
               account_circle
             </span>
           </div>
           }
           <div>
-            <p className='p-0 mb-0'><strong>{post.user.name}</strong></p>
-            {/* <p className='p-0 mb-0'><small>{DateTime.fromISO(post.timestamp).toLocaleString(DateTime.DATETIME_SHORT)}</small></p> */}
+            <Link href={`/users/${post.user._id}`} className='p-0 mb-0'><strong>{post.user.name}</strong></Link>
             <p className='p-0 mb-0'><small>{postTimeStampDisplay()}</small></p>
           </div>
         </div>
@@ -582,22 +598,37 @@ function FeedPostCardCommentSecitonNewComment({ postid, comments, setComments, a
 }
 
 function FeedPostCardCommentSectionCommentList({ comments }) {
+  const router = useRouter();
+
+  // Handle clicks on a user profile picture
+  function handleUserProfilePicClick(userId) {
+    router.push(`/users/${userId}`);
+  }
+
   return (
     <ul className='ps-0'>
       {comments.map((comment) => {
         return (
           <div className='row g-0 mt-2 d-flex flex-nowrap' key={comment._id}>
             {comment.user.profile_pic_url ? 
-            <img className={`my-auto rounded-circle ${styles.userProfilePic32}`} src={comment.user.profile_pic_url}/>
+            <img className={`my-auto rounded-circle ${styles.userProfilePic32}`} 
+              src={comment.user.profile_pic_url} onClick={() => handleUserProfilePicClick(comment.user._id)}
+            />
             :
-            <div className={`my-auto rounded-circle ${styles.userProfilePic32}`}>
+            <div className={`my-auto rounded-circle ${styles.userProfilePic32}`}
+              onClick={() => handleUserProfilePicClick(comment.user._id)}
+            >
               <span className={`material-symbols-outlined ${styles.userProfilePicIcon32}`}>
                 account_circle
               </span>
             </div>
             }
             <div className={`col-auto ms-2 ${styles.commentBubble} bg-light rounded-4 px-3 py-1 d-flex flex-column`}>
-              <div className='fw-semibold'><small>{comment.user.name}</small></div>
+              <Link className='fw-semibold' 
+                href={`/users/${comment.user._id}`}
+              >
+                  <small>{comment.user.name}</small>
+              </Link>
               <div className=''>{comment.content}</div>
             </div>
           </div>
