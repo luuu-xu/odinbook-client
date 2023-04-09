@@ -9,6 +9,7 @@ import Link from 'next/link';
 export default function HomeFeed({ feedType, postsData }) {
   const { data: session } = useSession();
   const [posts, setPosts] = useState([]);
+  const [endOfFeed, setEndOfFeed] = useState(false);
   const [postsLoading, setPostsLoading] = useState(true);
   const [authuserData, setAuthuserData] = useState({});
 
@@ -26,7 +27,7 @@ export default function HomeFeed({ feedType, postsData }) {
 
   // Fetch posts according to the home feedType
   useEffect(() => {
-    async function fetchAuthuserPosts() {
+    async function fetchAuthuserPostsAndSetPosts() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts`, {
         method: 'GET',
         headers: {
@@ -35,10 +36,14 @@ export default function HomeFeed({ feedType, postsData }) {
         },
       });
       const data = await res.json();
-      return data.posts;
+      if (data.posts.length < 10) {
+        setEndOfFeed(true);
+      }
+      setPosts(data.posts);
+      setPostsLoading(false);
     }
-    async function fetchFriendsPosts() {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/friends-posts`, {
+    async function fetchFeedPostsAndSetPosts() {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/feed-posts`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.accessToken}`,
@@ -46,43 +51,42 @@ export default function HomeFeed({ feedType, postsData }) {
         },
       });
       const data = await res.json();
-      return data.posts;
-    }
-    async function sortAndSetPosts() {
-      const authuserPosts = await fetchAuthuserPosts();
-      const friendsPosts = await fetchFriendsPosts();
-      const posts = [].concat(authuserPosts, friendsPosts);
-      posts.sort((a, b) => {
-        if (a.timestamp < b.timestamp) {
-          return 1;
-        }
-        if (a.timestamp > b.timestamp) {
-          return -1;
-        }
-      });
-      setPosts(posts);
-      setPostsLoading(false);
-    }
-    async function setAuthuserPosts() {
-      const authuserPosts = await fetchAuthuserPosts();
-      setPosts(authuserPosts);
-      setPostsLoading(false);
-    }
-    async function fetchAllPostsAndSetPosts() {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`);
-      const data = await res.json();
+      if (data.posts.length < 10) {
+        setEndOfFeed(true);
+      }
       setPosts(data.posts);
       setPostsLoading(false);
     }
-    if (feedType === 'profile') {
-      setAuthuserPosts();
-    } else if (feedType === 'home') {
-      sortAndSetPosts();
-    } else if (feedType === 'all') {
-      fetchAllPostsAndSetPosts();
-    } else if (feedType === 'user') {
+    async function fetchAllPostsAndSetPosts() {
+      // Fetch 10 of all posts startig from the most recent one
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`);
+      const data = await res.json();
+      if (data.posts.length < 10) {
+        setEndOfFeed(true);
+      }
+      setPosts(data.posts);
+      setPostsLoading(false);
+    }
+    function setUserPosts() {
+      if (posts.length < 10) {
+        setEndOfFeed(true);
+      }
       setPostsLoading(false);
       setPosts(postsData);
+    }
+    switch (feedType) {
+      case 'home':
+        fetchFeedPostsAndSetPosts();
+        break;
+      case 'profile':
+        fetchAuthuserPostsAndSetPosts();
+        break;
+      case 'all':
+        fetchAllPostsAndSetPosts();
+        break;
+      case 'user':
+        setUserPosts();
+        break;
     }
   }, [session]);
 
@@ -93,7 +97,9 @@ export default function HomeFeed({ feedType, postsData }) {
       {feedType === 'profile' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Your posts</h3>}
       {feedType === 'all' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>All posts</h3>}
       {feedType === 'user' && <h3 className={`mx-auto mt-4 mb-0 ${styles.feedCard}`}>Posts</h3>}
-      <FeedList posts={posts} postsLoading={postsLoading} authuserData={authuserData} feedType={feedType} />
+      <FeedList posts={posts} setPosts={setPosts} postsLoading={postsLoading} 
+        authuserData={authuserData} feedType={feedType} endOfFeed={endOfFeed}
+      />
     </div>
   );
 }
@@ -228,7 +234,51 @@ function NewPostCard({ authuserData }) {
   );
 }
 
-function FeedList({ posts, postsLoading, authuserData, feedType }) {
+function FeedList({ posts, setPosts, postsLoading, authuserData, feedType, endOfFeed }) {
+  const { data: session } = useSession();
+  const [morePostsLoading, setMorePostsLoading] = useState(false);
+  const [newEndOfFeed, setNewEndOfFeed] = useState(false);
+
+  // Fetch 10 of all posts startig from the last post id in the posts array
+  const fetchMorePostsFromLastId = async () => {
+    setMorePostsLoading(true);
+    const startId = posts[posts.length - 1]._id;
+    let res;
+    switch (feedType) {
+      case 'all':
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts?startId=${startId}`);
+        break;
+      case 'profile':
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/posts?startId=${startId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.accessToken}`,
+            'Content-Type': 'application/json'
+          },
+        });
+        break;
+      case 'user':
+        const userId = posts[0].user._id;
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${userId}/posts?startId=${startId}`);
+        break;
+      case 'home':
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/authuser/feed-posts?startId=${startId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.accessToken}`,
+            'Content-Type': 'application/json'
+          },
+        });
+        break;
+    }
+    const data = await res.json();
+    if (data.posts.length < 10) {
+      setNewEndOfFeed(true);
+    }
+    setMorePostsLoading(false);
+    setPosts(posts.concat(data.posts));
+  }
+
   if (postsLoading) {
     return (
       <div className={`mx-auto ${styles.feedCard} text-center`}>
@@ -241,11 +291,30 @@ function FeedList({ posts, postsLoading, authuserData, feedType }) {
 
   if (posts.length > 0) {
     return (
-      <ul className='ps-0'>
-        {posts.map((post) => {
-          return <FeedPostCard key={post._id} post={post} authuserData={authuserData} />
-        })}
-      </ul>
+      <>
+        <ul className='ps-0'>
+          {posts.map((post) => {
+            return <FeedPostCard key={post._id} post={post} authuserData={authuserData} />
+          })}
+        </ul>
+        {(!newEndOfFeed && !endOfFeed) 
+        ?
+        <div className='d-flex justify-content-center'>
+          {morePostsLoading ?
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          :
+          <button className='btn btn-outline-secondary'
+            onClick={fetchMorePostsFromLastId}
+          >
+            Load posts
+          </button>}
+        </div>
+        :
+        ''
+        }
+      </>
     );
   } else {
     return (
