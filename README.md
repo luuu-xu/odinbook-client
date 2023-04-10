@@ -44,6 +44,16 @@ The website includes the following pages:
 - /posts: Displays a list of all posts from all users.
 - /profile: Displays the profile page of the user and also a feed from user's posts.
 
+## Screenshots
+### IndexPage
+<img width="1459" alt="Screenshot 2023-04-10 at 19 34 57" src="https://user-images.githubusercontent.com/97932191/231019206-bbd29518-11ad-40b6-9bb1-a08ce927b7d5.png">
+
+### HomePage
+<img width="1460" alt="Screenshot 2023-04-10 at 19 35 33" src="https://user-images.githubusercontent.com/97932191/231019232-f99274a2-1f71-44a8-8427-5144e9eb3ae4.png">
+
+### UserPage
+<img width="1460" alt="Screenshot 2023-04-10 at 19 36 19" src="https://user-images.githubusercontent.com/97932191/231019261-43e9041b-eac7-407a-aaf2-3bfddaccb416.png">
+
 ## API Endpoints
 The website uses the API endpoints from [odinbook-api](https://github.com/luuu-xu/odinbook-api).
 
