@@ -4,6 +4,7 @@ import { signIn, useSession } from 'next-auth/react'
 import { useState } from 'react'
 import Layout from '@/components/layout';
 import HomeFeed from '@/components/homefeed';
+import Footer from '@/components/footer';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -41,6 +42,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   )
 }

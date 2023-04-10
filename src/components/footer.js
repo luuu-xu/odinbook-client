@@ -4,7 +4,7 @@ export default function Footer() {
   const svgfill = "#6c757d";
 
   return (
-    <footer className='container-fluid mt-4 py-3 d-flex justify-content-center align-items-center gap-2 flex-row bg-white border-top'>
+    <footer className='container-fluid py-3 d-flex justify-content-center align-items-center gap-2 flex-row bg-white border-top'>
       <p className='mb-0 text-secondary'>
         Made by <a className='link-secondary link-underline-secondary' href='https://github.com/luuu-xu'>luuu-xu</a> with:
       </p>
