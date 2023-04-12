@@ -56,7 +56,7 @@ export default function NavBar() {
             </span>
           </a>
           <a className={`nav-link ${activeNavLink === 'friends' ? 'active' : ''}`} href="/friends"
-            data-bs-toggle="tooltip" data-bs-title="Firends" data-bs-placement="bottom"
+            data-bs-toggle="tooltip" data-bs-title="Friends" data-bs-placement="bottom"
           >
             <span className={`material-symbols-outlined ${styles.navItemIcon}`}>
               group
