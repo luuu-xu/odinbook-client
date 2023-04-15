@@ -84,18 +84,18 @@ function CardLogin({ switchToSignup }) {
   const handleVisitorLogin = async () => {
     setLoginLoading(true);
     setLoginFailed(false);
-    let res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/visitor-login`, {
+    let res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/general-visitor-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       }
     });
     const data = await res.json();
-    console.log(data);
-    res = await signIn('credentials', { 
+    // console.log(data);
+    res = await signIn('credentials', {
       redirect: false,
       username: data.user.username,
-      password: data.user.username,
+      password: data.user.password,
     });
     if (!res.ok) {
       setLoginLoading(false);
