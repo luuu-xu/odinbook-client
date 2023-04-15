@@ -95,6 +95,7 @@ function ProfileEditModal({ userData, setUserData }) {
                 <input type="text" className="form-control" id="nameFormControlInput" required
                   value={userData.name ?? ''}
                   onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+                  disabled={userData.username === 'visitor' ? true : false}
                 />
               </div>
               <div className="mb-3">
@@ -102,6 +103,7 @@ function ProfileEditModal({ userData, setUserData }) {
                 <input type="text" className="form-control" id="profilePicUrlFormControlInput" required
                   value={userData.profile_pic_url ?? ''}
                   onChange={(e) => setUserData({ ...userData, profile_pic_url: e.target.value })}
+                  disabled={userData.username === 'visitor' ? true : false}
                 />
               </div>
               {isError && 
@@ -114,11 +116,19 @@ function ProfileEditModal({ userData, setUserData }) {
                 Profile updated, refreshing...
               </div>
               }
+              {userData.username === 'visitor' &&
+              <div className="alert alert-warning px-3 py-2" role="alert">
+                You can't edit the visitor's profile
+              </div>
+              }
             </form>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary" 
+              <button type="button" className="btn btn-primary"
                 onClick={handleSaveChanges}
+
+                // Disabling the Edit Profile button if the user is the general visitor
+                disabled={userData.username === 'visitor' ? true : false}
               >
                 {!isLoading && 'Save changes'}
                 {isLoading && 
