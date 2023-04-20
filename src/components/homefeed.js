@@ -679,13 +679,13 @@ function FeedPostCardCommentSectionCommentList({ comments }) {
       {comments.map((comment) => {
         return (
           <div className='row g-0 mt-2 d-flex flex-nowrap' key={comment._id}>
-            {comment.user.profile_pic_url ? 
+            {comment.user?.profile_pic_url ? 
             <img className={`my-auto rounded-circle ${styles.userProfilePic32}`} 
-              src={comment.user.profile_pic_url} onClick={() => handleUserProfilePicClick(comment.user._id)}
+              src={comment.user?.profile_pic_url} onClick={() => handleUserProfilePicClick(comment.user?._id)}
             />
             :
             <div className={`my-auto rounded-circle ${styles.userProfilePic32}`}
-              onClick={() => handleUserProfilePicClick(comment.user._id)}
+              onClick={() => handleUserProfilePicClick(comment.user?._id)}
             >
               <span className={`material-symbols-outlined ${styles.userProfilePicIcon32}`}>
                 account_circle
@@ -694,9 +694,9 @@ function FeedPostCardCommentSectionCommentList({ comments }) {
             }
             <div className={`col-auto ms-2 ${styles.commentBubble} bg-light rounded-4 px-3 py-1 d-flex flex-column`}>
               <Link className='fw-semibold' 
-                href={`/users/${comment.user._id}`}
+                href={`/users/${comment.user?._id}`}
               >
-                  <small>{comment.user.name}</small>
+                  <small>{comment.user?.name}</small>
               </Link>
               <div className=''>{comment.content}</div>
             </div>
